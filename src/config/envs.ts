@@ -7,14 +7,14 @@ interface EnvVars {
   NATS_SERVERS: string[];
 };
 
-const envsSchemas = joi.object({
+const envsSchema = joi.object({
   PORT: joi.number().required(),
 
   NATS_SERVERS: joi.array().items(joi.string()).required(),
 })
   .unknown(true);
 
-const { error, value } = envsSchemas.validate({
+const { error, value } = envsSchema.validate({
   ...process.env,
   NATS_SERVERS: process.env.NATS_SERVERS?.split(','),
 });
