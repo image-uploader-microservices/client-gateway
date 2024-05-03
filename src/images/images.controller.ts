@@ -1,9 +1,10 @@
-import { BadRequestException, Controller, HttpStatus, Inject, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, Get, HttpStatus, Inject, Param, ParseUUIDPipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ClientProxy, RpcException, } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { NATS_SERVICE } from '../config';
 import { imageFilter } from './helpers/image-filter.helper';
+import { catchError } from 'rxjs';
 
 @Controller()
 export class ImagesController {
@@ -28,15 +29,23 @@ export class ImagesController {
     return this.client.send('uploadImage', { image });
   }
 
-  // @MessagePattern('findAllImages')
-  // findAll() {
-  //   return this.imagesService.findAll();
-  // }
+  @Get('')
+  findAll() {
+    return this.client.send('findAllImages', '')
+      .pipe(
+        catchError(err => { throw new RpcException(err) }),
+      );
+  }
 
-  // @MessagePattern('findOneImage')
-  // findOne(@Payload() id: number) {
-  //   return this.imagesService.findOne(id);
-  // }
+  @Get(':id')
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.client.send('findOneImage', { id })
+      .pipe(
+        catchError(err => { throw new RpcException(err) }),
+      );
+  }
 
   // @MessagePattern('updateImage')
   // update(@Payload() updateImageDto: UpdateImageDto) {
